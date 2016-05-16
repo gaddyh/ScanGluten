@@ -1,0 +1,9 @@
+<ion-modal-view class="background" >
+<ion-content class="padding" on-swipe-right="onSwipeRight()">
+  	<img ng-src="data:image/png;base64, {{item.image}}"  width="50%" height="50%" class="image center" ng-click = "closeModal()"/>
+</ion-content>
+ <ion-content>
+      <button class = "button icon icon-left ion-ios-close-outline"
+         ng-click = "closeModal()">סגור</button>
+   </ion-content>
+</ion-modal-view>

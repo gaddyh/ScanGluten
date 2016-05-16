@@ -1,0 +1,16 @@
+<ion-header-bar class="bar-light">
+      <input type="text" placeholder="מוצר" ng-model="product" >
+</ion-header-bar>
+<ion-header-bar class="bar-light bar-subheader">
+      <input type="text" placeholder="יצרן" ng-model="producer">
+</ion-header-bar>
+<ion-content class="background" on-swipe-right="onSwipeRight()">
+    <button class="button button-block" ng-click="search()"> 
+    חפש
+    </button>
+<ion-list>
+  <ion-item ng-repeat="item in items" ng-click = "openDetails(item.barcode)">
+    {{item.name}}
+  </ion-item>
+</ion-list>
+</ion-content>

@@ -1,0 +1,46 @@
+<ion-content class="green" on-swipe-right="onSwipeRight()">
+<div class="row">
+  <div class="col-80 col-offset-10">
+	<img ng-src="data:image/png;base64, {{item.image}}"  class="image center" ng-click = "openModal()"/>
+  </div>
+  <div class="col-20">
+	<img src="img/camera.png" width="40" height="40" ion-track-tap="onPhoto" ion-track-data="{onPhoto: 1}" ng-click="onPhoto()">
+  </div>
+</div>
+		<div class="item item-avatar">
+			<img src="img/product.png">
+			<input type="text" ng-model="item.name" placeholder="שם מוצר" style="font-size: 15px; width: 100%">
+		</div>
+        <div class="item item-avatar">
+			<img src="img/manufactor.png">
+			<input type="text" ng-model="item.producer" placeholder="יצרן" style="font-size: 15px;" class="text-center">
+		</div>
+		<div class="item item-avatar ">
+			<img src="img/barcode.png">
+			<h2 style="font-size: 15px;" class="text-center"> {{item.barcode}}</h2>
+		</div>
+        
+		<div>
+	        <img class="center" style="width: 60%" src="img/question.png"/>
+        </div>
+        
+        <div class="row">
+  <div class="col">
+        <div class="item item-avatar" ion-track-hold="positive" ion-track-data="{positive: 1}" on-hold="gfClick()">
+            <img src="img/positive.png" >
+	        <h2 style="font-size: 20px;" class="text-center item-text-wrap"> {{item.gf}}</h2>
+        </div>
+  </div>
+  <div class="col">
+			  <div class="item item-avatar" ion-track-hold="negative" ion-track-data="{negative: 1}" on-hold="ngfClick()">
+            <img src="img/negative.png" >
+	        <h2 style="font-size: 20px;" class="text-center item-text-wrap"> {{item.ngf}}</h2>
+        </div>
+  </div>
+</div>
+<div>
+    <button class="button button-block" ion-track-tap="update" ion-track-data="{update: 1}" ng-click="update()">
+    שלח
+    </button>
+</div>
+</ion-content>

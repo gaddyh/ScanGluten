@@ -1,0 +1,109 @@
+h1 {
+    text-align: center;
+}
+
+.background {
+    background-image: url("../img/background.png");
+    background-size: cover; 
+    background-position: center; 
+    margin: auto; 
+    z-index: 2; 
+}
+
+.green2 {
+    background-color: #00cc00; 
+}
+
+.green {
+    background-color: #8ac760; 
+}
+
+.circle {
+	border-radius: 50%;
+	width: 300px;
+	height: 300px; 
+	/* width and height can be anything, as long as they're equal */
+}
+.smallcircle {
+	border-radius: 50%;
+	width: 300px;
+	height: 300px; 
+	/* width and height can be anything, as long as they're equal */
+     background-color: #ffffff;  
+}
+.smallcontainer {
+    position: absolute;
+    top: 80%;
+    left: 80%;
+    transform: translateX(-50%) translateY(-50%);
+    /* background-color: #8ac760; */ 
+}
+.container {
+    position: absolute;
+    top: 30%;
+    left: 12%;
+  /*  transform: translateX(-50%) translateY(-50%); */
+    background-color: #8ac760;  
+}
+
+.blink {
+  animation: blink-animation 1s steps(5, start) infinite;
+  -webkit-animation: blink-animation 1s steps(5, start) infinite;
+}
+@keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}
+@-webkit-keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}
+
+.center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto 
+    }
+    
+.image {
+   padding:1px;
+   border:1px solid #ffffff;
+}
+
+.item{
+   border:3px solid #8ac760;
+}
+
+.left1 {
+    position: absolute;
+    left: 0px;
+}
+
+.left {
+    float: left;
+}
+
+.item-text-center
+{
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -moz-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    -webkit-align-items: center;
+    -moz-align-items: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    height: 100%;
+}
+
+.wrapping-list .item-content, .wrapping-list .item {
+    overflow: initial;
+    white-space: initial;
+}
