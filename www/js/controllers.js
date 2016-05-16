@@ -31,15 +31,19 @@ $scope.Scan = function(){
         console.log( "scans " + $rootScope.scans);
         $ionicAnalytics.track("ScanStart", {uuid: device.uuid, scans: $rootScope.scans})
 
+      var isIOS = ionic.Platform.isIOS();
+      if (isIOS)
         scanner.startScanning(MWBSInitSpace.init,function(result){
-            //console.log("scanns after scan code " + result.code);
-            //console.log("scanns after scan type" + result.type);
-
             if (result.type == 'Cancel')
             return;
-
             $state.go('detail', {barcode: result.code});
-        },0,13,100,74);
+            });
+        else
+            scanner.startScanning(MWBSInitSpace.init,function(result){
+                if (result.type == 'Cancel')
+                return;
+                $state.go('detail', {barcode: result.code});
+                },0,13,100,74);
     }
   }
 })
