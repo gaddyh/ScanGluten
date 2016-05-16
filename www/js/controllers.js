@@ -142,7 +142,7 @@ $ionicModal.fromTemplateUrl('templates/newProduct.html', {
     }
     
     
-$scope.refresh = function(){
+$scope.refresh = function(sendAnalytics){
 
   $scope.show();
 
@@ -152,17 +152,25 @@ $scope.refresh = function(){
     userService.getProduct($stateParams.barcode).then(function(response){
             console.log("response 1 " + response);
             if(response == null) {
+                
                 $scope.item.gf=0;
                 $scope.item.ngf=0;
-            }
-            else
-                $scope.item = response;
                 
+                if(sendAnalytics == 1)
+                    $ionicAnalytics.track("NewProduct", {uuid: device.uuid});
+                
+            }
+            else {
+                    $scope.item = response;
+
+                    if (sendAnalytics == 1)
+                        $ionicAnalytics.track("ExistingProduct", {uuid: device.uuid});
+            }                
             $scope.hide();
      });
  }
 
-$scope.refresh();
+$scope.refresh(1);
 
   $scope.onPhoto = function(){
 
@@ -215,7 +223,7 @@ $scope.refresh();
   }
 
   $scope.$on('$ionicView.enter', function(e) {
-    $scope.refresh();
+    $scope.refresh(0);
   });
 
 	
