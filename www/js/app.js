@@ -38,12 +38,12 @@ angular.module('scanGluten', ['ionic','ionic.service.core','ionic.service.analyt
      })
      
      .state('messages', {
-         url: "/messages",
+         url: "/messages/:barcode",
          templateUrl: "templates/talkBack.html",
          controller: "MessagesCtrl"
      })
 
-  $urlRouterProvider.otherwise('/messages');
+  $urlRouterProvider.otherwise('/main');
 })
 
 .run(function($ionicPlatform, $ionicAnalytics, $rootScope) {

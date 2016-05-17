@@ -1,13 +1,19 @@
 angular.module('scanGluten.controllers', [])
 
 
-.controller("MessagesCtrl",function(userService, $rootScope,$scope, $ionicPlatform,$state,$ionicAnalytics){
-    
+.controller("MessagesCtrl",function(userService, $rootScope,$scope, $ionicPlatform,$state,$ionicAnalytics,$stateParams,$ionicViewService){
+
+$scope.onSwipeDown = function(){
+    //$state.go('main');
+    var backView = $ionicViewService.getBackView();
+    backView && backView.go();
+  }
+      
     $scope.go = function(link){
         cordova.InAppBrowser.open(link, "_system");
     }
     
-    userService.getMessages(432).then(function(response){
+    userService.getMessages($stateParams.barcode).then(function(response){
         $scope.messages = response.messages;
     });
 
@@ -27,10 +33,14 @@ angular.module('scanGluten.controllers', [])
     */
     
     $scope.addMessage = function(msg){
+        
+        if ($scope.messages == null)
+            $scope.messages =[];
+            
         $scope.messages.push(msg)
         
         var params = {"messages": $scope.messages};
-        userService.updateMessages(432, params).then(function(data){
+        userService.updateMessages($stateParams.barcode, params).then(function(data){
         });
     }
     
@@ -265,6 +275,11 @@ $scope.refresh(1);
     backView && backView.go();
   }
 
+
+$scope.onSwipeDown = function(){
+    $state.go('messages', {barcode: $scope.item.barcode});
+  }
+  
   $scope.$on('$ionicView.enter', function(e) {
     $scope.refresh(0);
   });
