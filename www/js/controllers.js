@@ -3,6 +3,8 @@ angular.module('scanGluten.controllers', [])
 
 .controller("MessagesCtrl",function(userService, $rootScope,$scope, $ionicPlatform,$state,$ionicAnalytics,$stateParams,$ionicViewService){
 
+$scope.name = $stateParams.name;
+
 $scope.onSwipeDown = function(){
     //$state.go('main');
     var backView = $ionicViewService.getBackView();
@@ -277,7 +279,7 @@ $scope.refresh(1);
 
 
 $scope.onSwipeDown = function(){
-    $state.go('messages', {barcode: $scope.item.barcode});
+    $state.go('messages', {barcode: $scope.item.barcode, name: $scope.item.name});
   }
   
   $scope.$on('$ionicView.enter', function(e) {

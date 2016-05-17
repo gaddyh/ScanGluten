@@ -38,7 +38,7 @@ angular.module('scanGluten', ['ionic','ionic.service.core','ionic.service.analyt
      })
      
      .state('messages', {
-         url: "/messages/:barcode",
+         url: "/messages/:barcode/:name",
          templateUrl: "templates/talkBack.html",
          controller: "MessagesCtrl"
      })

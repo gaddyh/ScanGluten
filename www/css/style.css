@@ -129,7 +129,7 @@ h1 {
 /** ios1-ios6 bubbles **/
 .bubble {
   box-sizing: border-box;
-  float: left;
+  float: right;
   width: auto;
   max-width: 80%;
   position: relative;
