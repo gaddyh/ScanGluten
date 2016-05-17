@@ -104,7 +104,7 @@ $scope.Scan = function(){
 .controller("DetailCtrl",function($rootScope, userService, $scope, $state, $stateParams, Camera, $cordovaToast, $ionicModal, $ionicLoading, $ionicAnalytics, $ionicViewService){
 
 $rootScope.deregisterHardBack();
-
+$scope.isNewProduct=0;
 var disableUpdate=0;
 scanner.closeScanner();
 
@@ -156,9 +156,10 @@ $scope.refresh = function(sendAnalytics){
                 $scope.item.gf=0;
                 $scope.item.ngf=0;
                 
-                if(sendAnalytics == 1)
+                if(sendAnalytics == 1) {
                     $ionicAnalytics.track("NewProduct", {uuid: device.uuid});
-                
+                    $scope.isNewProduct=1;
+                }
             }
             else {
                     $scope.item = response;
@@ -182,10 +183,15 @@ $scope.refresh(1);
   }
 
   $scope.update = function(){
+      console.log("now: " + Date.now());
+      $scope.item.timestamp=Date.now();
     userService.updateProduct($scope.item.barcode, $scope.item).then(function(data){
       console.log(JSON.stringify($scope.item));
     });
     
+    if ($scope.isNewProduct == 1)
+        $ionicAnalytics.track("UpdateNewProduct", {uuid: device.uuid});
+        
     $scope.showToast('תודה רבה', 'short', 'bottom');
     $state.go('main');
   }
