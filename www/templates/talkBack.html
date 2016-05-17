@@ -1,7 +1,7 @@
 <ion-content class="green" on-swipe-right="onSwipeRight()">
     <div class="chatContainer">
         <div ng-repeat="message in messages">
-            <div class="bubble">
+            <div class="bubble" ng-click="go(message)">
                <p> {{ message }} </p>
             </div>
         </div>

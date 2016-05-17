@@ -3,6 +3,10 @@ angular.module('scanGluten.controllers', [])
 
 .controller("MessagesCtrl",function(userService, $rootScope,$scope, $ionicPlatform,$state,$ionicAnalytics){
     
+    $scope.go = function(link){
+        cordova.InAppBrowser.open(link, "_system");
+    }
+    
     userService.getMessages(432).then(function(response){
         $scope.messages = response.messages;
     });
@@ -29,6 +33,8 @@ angular.module('scanGluten.controllers', [])
         userService.updateMessages(432, params).then(function(data){
         });
     }
+    
+    
 })
 
 .controller("MainCtrl",function($rootScope,$scope, $ionicPlatform,$state,$ionicAnalytics){
