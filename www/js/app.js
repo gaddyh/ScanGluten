@@ -43,7 +43,7 @@ angular.module('scanGluten', ['ionic','ionic.service.core','ionic.service.analyt
          controller: "MessagesCtrl"
      })
 
-  $urlRouterProvider.otherwise('/main');
+  $urlRouterProvider.otherwise('/messages');
 })
 
 .run(function($ionicPlatform, $ionicAnalytics, $rootScope) {

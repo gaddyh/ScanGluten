@@ -69,6 +69,38 @@ angular.module('scanGluten.services', [])
 
       return q.promise;
 		},
+		getMessages: function(barcode){
+     console.log("after barcode" + barcode);
+
+      var q = $q.defer();
+			$http.get("http://139.59.196.41:9200/gluten_beta2/messages/" + barcode).then(function(response){
+         console.log("after response");
+         console.log("after " + JSON.stringify(response));
+        if (response.data.found)
+            q.resolve(response.data._source);
+        else
+            q.resolve(null);
+      }, function(err) {
+        console.log("after get http error");
+        console.log("after " + JSON.stringify(err));
+        q.resolve(null);
+      });
+
+      return q.promise;
+		},
+		updateMessages: function(id, params){
+
+      var q = $q.defer();
+
+			$http.post("http://139.59.196.41:9200/gluten_beta2/messages/" + id,params).then(function(response){
+        q.resolve(response);
+      }, function(err) {
+        console.log(JSON.stringify(err));
+        q.reject(err);
+      });
+
+      return q.promise;
+    },
 		updateProduct: function(id, params){
 
       var q = $q.defer();

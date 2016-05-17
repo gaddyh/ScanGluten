@@ -1,7 +1,13 @@
 angular.module('scanGluten.controllers', [])
 
 
-.controller("MessagesCtrl",function($rootScope,$scope, $ionicPlatform,$state,$ionicAnalytics){
+.controller("MessagesCtrl",function(userService, $rootScope,$scope, $ionicPlatform,$state,$ionicAnalytics){
+    
+    userService.getMessages(432).then(function(response){
+        $scope.messages = response.messages;
+    });
+
+    /*
     $scope.messages = [{"bla":"any"},{"bla":"any2"}, 
     {"bla":"yes very good 3"},
     {"bla":"yes very good 3"},
@@ -14,9 +20,14 @@ angular.module('scanGluten.controllers', [])
     {"bla":" very good 3"},
     {"bla":" very good 3"},
     ];
+    */
     
     $scope.addMessage = function(msg){
-        $scope.messages.push({"bla":msg})
+        $scope.messages.push(msg)
+        
+        var params = {"messages": $scope.messages};
+        userService.updateMessages(432, params).then(function(data){
+        });
     }
 })
 
