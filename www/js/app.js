@@ -36,6 +36,12 @@ angular.module('scanGluten', ['ionic','ionic.service.core','ionic.service.analyt
          templateUrl: "templates/unLabedlItems.html",
          controller: "UnLabedlItemsCtrl"
      })
+     
+     .state('messages', {
+         url: "/messages",
+         templateUrl: "templates/talkBack.html",
+         controller: "MessagesCtrl"
+     })
 
   $urlRouterProvider.otherwise('/main');
 })

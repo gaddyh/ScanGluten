@@ -55,10 +55,6 @@ angular.module('scanGluten.services', [])
 
       var q = $q.defer();
 			$http.get("http://139.59.196.41:9200/gluten_beta2/item/" + barcode).then(function(response){
-//			$http.post("http://178.62.24.25:9200/gluten_beta2/item/_search?pretty",{"query": {"query_string": {"query": barcode,"fields": ["barcode"]}}}).then(function(response){
-//			$http.post("http://178.62.24.25:9200/tests/test/_search?pretty",{"query": {"query_string": {"query": barcode,"fields": ["barcode"]}}}).then(function(response){
-      //$http.post("http://178.62.24.25:9200/glutens/product/_search?pretty",{"query": {"query_string": {"query": barcode,"fields": ["barcode"]}}}).then(function(response){
-      //$http.post("http://192.168.43.121:1337/192.168.43.121:9200/glutens2/product/_search?pretty",{"query": {"query_string": {"query": barcode,"fields": ["barcode"]}}}).then(function(response){
          console.log("after response");
          console.log("after " + JSON.stringify(response));
         if (response.data.found)
@@ -78,8 +74,6 @@ angular.module('scanGluten.services', [])
       var q = $q.defer();
 
 			$http.post("http://139.59.196.41:9200/gluten_beta2/item/" + id,params).then(function(response){
-//			$http.post("http://178.62.24.25:9200/tests/test/" + id,params).then(function(response){
-      //$http.post("http://192.168.43.121:1337/192.168.43.121:9200/glutens2/product/" + id,params).then(function(response){
         q.resolve(response);
       }, function(err) {
         console.log(JSON.stringify(err));

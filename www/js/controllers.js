@@ -1,5 +1,25 @@
 angular.module('scanGluten.controllers', [])
 
+
+.controller("MessagesCtrl",function($rootScope,$scope, $ionicPlatform,$state,$ionicAnalytics){
+    $scope.messages = [{"bla":"any"},{"bla":"any2"}, 
+    {"bla":"yes very good 3"},
+    {"bla":"yes very good 3"},
+    {"bla":"yes"},
+    {"bla":" very good 3"},
+    {"bla":" very good 3"},
+    {"bla":" very good 3"},
+    {"bla":" very good 3"},
+    {"bla":" very good 3"},
+    {"bla":" very good 3"},
+    {"bla":" very good 3"},
+    ];
+    
+    $scope.addMessage = function(msg){
+        $scope.messages.push({"bla":msg})
+    }
+})
+
 .controller("MainCtrl",function($rootScope,$scope, $ionicPlatform,$state,$ionicAnalytics){
 
 customBackFunction = function(){
