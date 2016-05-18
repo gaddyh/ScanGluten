@@ -5,16 +5,14 @@
 // the 2nd parameter is an array of 'requires'
 angular.module('scanGluten', ['ionic','ionic.service.core','ionic.service.analytics', 'ngCordova', 'scanGluten.controllers', 'scanGluten.services'])
 
-.config(function($stateProvider, $urlRouterProvider){
+.config(function($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
 
+  $ionicConfigProvider.views.transition('none');
+  
 	$stateProvider
 
 	.state('main', {
 		url: "/main",
-		nativeTransitions: {
-			 "type": "zoomOutUp",
-			 "direction": "down"
-	 },
 		templateUrl: "templates/main.html",
 		controller: 'MainCtrl',
 	})
@@ -24,26 +22,29 @@ angular.module('scanGluten', ['ionic','ionic.service.core','ionic.service.analyt
     templateUrl: "templates/detail.html",
     controller: "DetailCtrl",
   })
-
-	.state('new', {
-		 url: "/new/:param",
-		 templateUrl: "templates/newProduct.html",
-		 controller: "NewProductCtrl",
-	 })
      
-     .state('unLabedlItems', {
-         url: "/unLabedlItems",
-         templateUrl: "templates/unLabedlItems.html",
-         controller: "UnLabedlItemsCtrl"
-     })
-     
+  .state('unLabedlItems', {
+      url: "/unLabedlItems",
+      templateUrl: "templates/unLabedlItems.html",
+      controller: "UnLabedlItemsCtrl"
+  })
      .state('messages', {
          url: "/messages/:barcode/:name",
          templateUrl: "templates/talkBack.html",
          controller: "MessagesCtrl"
      })
+    
+    .state('first-time', {
+      url: '/first-time',
+      templateUrl: 'templates/first-time.html',
+      controller: 'FirstTimeCtrl'
+    })
 
-  $urlRouterProvider.otherwise('/main');
+    if (window.localStorage['firstTimeUse'] != 'no') {
+        $urlRouterProvider.otherwise('/first-time');  
+    } else {
+          $urlRouterProvider.otherwise('/main');
+      }
 })
 
 .run(function($ionicPlatform, $ionicAnalytics, $rootScope) {
