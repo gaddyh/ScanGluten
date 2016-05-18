@@ -1,5 +1,57 @@
 angular.module('scanGluten.controllers', [])
 
+
+.controller("MessagesCtrl",function(userService, $rootScope,$scope, $ionicPlatform,$state,$ionicAnalytics,$stateParams,$ionicViewService, $ionicHistory){
+
+$scope.name = $stateParams.name;
+
+$scope.onSwipeLeft = function(){
+    $ionicHistory.goBack(-2);
+  }
+  
+$scope.onSwipeRight = function(){
+    $ionicHistory.goBack();
+  }
+      
+    $scope.go = function(link){
+        cordova.InAppBrowser.open(link, "_system");
+    }
+    
+    userService.getMessages($stateParams.barcode).then(function(response){
+        if (response != null)
+            $scope.messages = response.messages;
+    });
+
+    /*
+    $scope.messages = [{"bla":"any"},{"bla":"any2"}, 
+    {"bla":"yes very good 3"},
+    {"bla":"yes very good 3"},
+    {"bla":"yes"},
+    {"bla":" very good 3"},
+    {"bla":" very good 3"},
+    {"bla":" very good 3"},
+    {"bla":" very good 3"},
+    {"bla":" very good 3"},
+    {"bla":" very good 3"},
+    {"bla":" very good 3"},
+    ];
+    */
+    
+    $scope.addMessage = function(msg){
+        
+        if ($scope.messages == null)
+            $scope.messages =[];
+            
+        $scope.messages.push(msg)
+        
+        var params = {"messages": $scope.messages};
+        userService.updateMessages($stateParams.barcode, params).then(function(data){
+        });
+    }
+    
+    
+})
+
 .controller("MainCtrl",function($rootScope,$scope, $ionicPlatform,$state,$ionicAnalytics){
 
 customBackFunction = function(){
@@ -101,7 +153,7 @@ $scope.Scan = function(){
      });
 })
 
-.controller("DetailCtrl",function($rootScope, userService, $scope, $state, $stateParams, Camera, $cordovaToast, $ionicModal, $ionicLoading, $ionicAnalytics, $ionicViewService){
+.controller("DetailCtrl",function($rootScope, userService, $scope, $state, $stateParams, Camera, $cordovaToast, $ionicModal, $ionicLoading, $ionicAnalytics, $ionicViewService, $ionicHistory){
 
 $rootScope.deregisterHardBack();
 $scope.isNewProduct=0;
@@ -223,11 +275,14 @@ $scope.refresh(1);
   }
 
   $scope.onSwipeRight = function(){
-    //$state.go('main');
-    var backView = $ionicViewService.getBackView();
-    backView && backView.go();
+    $ionicHistory.goBack();
   }
 
+
+$scope.onSwipeLeft = function(){
+    $state.go('messages', {barcode: $scope.item.barcode, name: $scope.item.name});
+  }
+  
   $scope.$on('$ionicView.enter', function(e) {
     $scope.refresh(0);
   });
@@ -247,6 +302,18 @@ $scope.refresh(1);
    });
 	
 })
+
+.controller('FirstTimeCtrl', ['$scope', '$state',  function($scope, $state) {
+  
+   $scope.showAgain = function() {
+     $state.go("main");  
+   }
+   
+   $scope.lastTime = function() {
+     window.localStorage['firstTimeUse'] = 'no';
+     $state.go("main");  
+   }
+}]);
 
   // With the new view caching in Ionic, Controllers are only called
   // when they are recreated or on app start, instead of every page change.

@@ -1,3 +1,22 @@
-<ion-content class="green" on-swipe-right="onSwipeRight()">
+<ion-header-bar align-title="center" class="bar-light">
+    <h1 class="title">{{ name }}</h1>
+</ion-header-bar>
+<ion-content class="green" on-swipe-right="onSwipeRight()" on-swipe-left="onSwipeLeft()">
+    <div class="chatContainer">
+        <div ng-repeat="message in messages track by $index">
+            <div class="bubble" ng-click="go(message)">
+               <p> {{ message }} </p>
+            </div>
+        </div>
+    </div>
 </ion-content>
- 
+ <ion-footer-bar class="bar-stable item-input-inset message-footer" keyboard-attach>
+        <label class="item-input-wrapper">
+            <textarea ng-model="input.message" value="" placeholder="הוסף הודעה" required minlength="1" maxlength="1500" msd-elastic></textarea>
+        </label>
+        <div class="footer-btn-wrap">
+        <button class="button button-icon icon ion-android-send footer-btn"
+            ng-disabled="!input.message || input.message === ''" ng-click="addMessage(input.message)">
+        </button>
+        </div>
+    </ion-footer-bar>
