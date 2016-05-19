@@ -23,7 +23,7 @@ angular.module('scanGluten', ['ionic','ionic.service.core','ionic.service.analyt
     controller: "DetailCtrl",
   })
      
-  .state('unLabedlItems', {
+  .state('search', {
       url: "/unLabedlItems",
       templateUrl: "templates/unLabedlItems.html",
       controller: "UnLabedlItemsCtrl"

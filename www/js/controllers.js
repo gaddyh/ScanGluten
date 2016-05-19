@@ -60,6 +60,10 @@ $scope.onSwipeRight = function (){
     $rootScope.deregisterHardBack();
 }
 
+$scope.onSwipeUp = function (){
+   $state.go('search');
+}
+
 $scope.Scan = function(){
     var debug = false;   
     if(debug) 
@@ -77,42 +81,19 @@ $scope.Scan = function(){
     }
 })
 
-.controller("UnLabedlItemsCtrl", function($scope, userService,$state){
+.controller("UnLabedlItemsCtrl", function($scope, userService,$state,$ionicHistory){
     
+    $scope.onSwipeRight = function(){
+    $ionicHistory.goBack();
+  }
+
     $scope.search = function()
     {
         items=[]
         
-        if ($scope.producer.length>0)
-            userService.searchUnLabeled($scope.producer, $scope.product).then(function(response){
-                console.log("response 1 " + response);
-                if(response == null) {
-                    alert("null")
-                }
-                else
-                {
-                    for (var i = 0; i < response.length; i++) {
-                        if(!response[i]._source.name || response[i]._source.name.length == 0)
-                            d=1
-                        else {
-                                console.log("push " + JSON.stringify(response[i]._source));
-                            
-                            items.push(response[i]._source)
-                        }
-                    }
-                    $scope.items = items;
-                }
-            });
-    }
-    
-    $scope.openDetails = function(code){
-            $state.go('detail', {barcode: code});
-    }
-    items=[]
-     userService.getUnLabeled().then(function(response){
+        userService.searchGFByName($scope.name, $scope.producer).then(function(response){
             console.log("response 1 " + response);
             if(response == null) {
-                alert("null")
             }
             else
             {
@@ -127,12 +108,19 @@ $scope.Scan = function(){
                 }
                 $scope.items = items;
             }
-     });
+        });
+    }
+    
+    $scope.openDetails = function(code){
+            $state.go('detail', {barcode: code});
+    }
 })
 
 .controller("DetailCtrl",function($rootScope, userService, $scope, $state, $stateParams, Camera, $cordovaToast, $ionicModal, $ionicLoading, $ionicAnalytics, $ionicViewService, $ionicHistory, analytics){
 
-    $rootScope.deregisterHardBack();
+    if ($rootScope.deregisterHardBack != null)
+        $rootScope.deregisterHardBack();
+        
     $scope.isNewProduct=0;
     var disableUpdate=0;
     scanner.closeScanner();

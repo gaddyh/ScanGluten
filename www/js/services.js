@@ -3,7 +3,61 @@ angular.module('scanGluten.services', [])
 .factory('userService', function($http, $q,$rootScope) {
 	return {
         
-        searchUnLabeled: function(producer,name){
+        searchGFByName: function(name,producer){
+            var q = $q.defer();
+            matches=[];
+            
+            if (name && name.length>0) {
+              literals = name.split(" ");
+              for (i = 0; i < literals.length; i++) { 
+                  matches.push( {  "match": { "name": "\"" + literals[i] + "\""  }} );
+              }
+            }
+            
+            if (producer && producer.length>0) {
+              literals = producer.split(" ");
+              for (i = 0; i < literals.length; i++) { 
+                  matches.push( {  "match": { "producer": "\"" + literals[i] + "\""  }} );
+              }
+            }
+            
+            query = {"query": {
+                      "filtered": {
+                        "filter": {
+                          "script": {
+                            "script": "doc[\"gf\"].value > doc[\"ngf\"].value"
+                          }
+                        },
+                        "query": {
+                          "bool": {
+                            "must": 
+                              matches
+                          }
+                        }
+                      }
+                    }
+                  }
+                  
+            console.log(JSON.stringify(query));
+            $http.post("http://139.59.196.41:9200/gluten_beta2/item/_search?size=100",query).then(function(response){
+            if (response.data.hits)
+            {
+                console.log("after response 11");
+                console.log("after " + JSON.stringify(response));
+                q.resolve(response.data.hits.hits);
+            }
+            else {
+                console.log("after " + JSON.stringify(response.data));
+                q.resolve(null);
+            }                
+            }, function(err) {
+                console.log("after response 33 " + err);
+                q.resolve(null);
+            });
+
+          return q.promise;
+		},
+      searchUnLabeled: function(producer,name){
             var q = $q.defer();
             query = {"query": {"bool": {"must": [{ "match": { "gf":  "0" }},{ "match": { "ngf": "0"}},{ "match": { "name": "\"" + name + "\""}},{ "match": { "producer": "\"" + producer + "\""}}]}}}
             
@@ -57,10 +111,10 @@ angular.module('scanGluten.services', [])
 			$http.get("http://139.59.196.41:9200/gluten_beta2/item/" + barcode).success(function(response){
          console.log("after response");
          console.log("after " + JSON.stringify(response));
-        if (response.data.found) {
+        if (response.found) {
           if (sendAnalytics == 1) 
             analytics.trackEvent("ExistingProduct", 'Loaded',barcode,0);
-          q.resolve(response.data._source);
+          q.resolve(response._source);
         }
         else {
             if(sendAnalytics == 1) 
