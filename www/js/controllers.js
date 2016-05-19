@@ -3,17 +3,17 @@ angular.module('scanGluten.controllers', [])
 
 .controller("MessagesCtrl",function(userService, $rootScope,$scope, $ionicPlatform,$state,$ionicAnalytics,$stateParams,$ionicViewService, $ionicHistory, analytics){
 
-analytics.trackView("Messages");
+    analytics.trackView("Messages");
 
-$scope.name = $stateParams.name;
+    $scope.name = $stateParams.name;
 
-$scope.onSwipeLeft = function(){
-    $ionicHistory.goBack(-2);
-  }
-  
-$scope.onSwipeRight = function(){
-    $ionicHistory.goBack();
-  }
+    $scope.onSwipeLeft = function(){
+        $ionicHistory.goBack(-2);
+    }
+    
+    $scope.onSwipeRight = function(){
+        $ionicHistory.goBack();
+    }
       
     $scope.go = function(link){
         cordova.InAppBrowser.open(link, "_system");
@@ -24,20 +24,7 @@ $scope.onSwipeRight = function(){
             $scope.messages = response.messages;
     });
 
-    /*
-    $scope.messages = [{"bla":"any"},{"bla":"any2"}, 
-    {"bla":"yes very good 3"},
-    {"bla":"yes very good 3"},
-    {"bla":"yes"},
-    {"bla":" very good 3"},
-    {"bla":" very good 3"},
-    {"bla":" very good 3"},
-    {"bla":" very good 3"},
-    {"bla":" very good 3"},
-    {"bla":" very good 3"},
-    {"bla":" very good 3"},
-    ];
-    */
+    //$scope.messages = [{"bla":"any"},{"bla":"any2"},];
     
     $scope.addMessage = function(msg){
         
@@ -50,11 +37,9 @@ $scope.onSwipeRight = function(){
         userService.updateMessages($stateParams.barcode, params).then(function(data){
         });
     }
-    
-    
 })
 
-.controller("MainCtrl",function($rootScope,$scope, $ionicPlatform,$state,$ionicAnalytics, analytics){
+.controller("MainCtrl",function($rootScope,$scope, $ionicPlatform,$state,$ionicAnalytics, analytics,scannerHelper){
 
 analytics.trackView("Main");
 
@@ -62,12 +47,15 @@ customBackFunction = function(){
     console.log("stop scanner");
     scanner.closeScanner();
 
+    analytics.trackEvent('Scan', 'Stop', 'Canceled', $rootScope.scans);
+
     $rootScope.deregisterHardBack();
 }
 
 $scope.onSwipeRight = function (){
     console.log("stop scanner");
     scanner.closeScanner();
+    analytics.trackEvent('Scan', 'Stop', 'Canceled', $rootScope.scans);
     
     $rootScope.deregisterHardBack();
 }
@@ -77,39 +65,16 @@ $scope.Scan = function(){
     if(debug) 
         $state.go('detail', {barcode: 7290106657403});
     else {
-            // override hard back
-            // registerBackButtonAction() returns a function which can be used to deregister it
-            $rootScope.deregisterHardBack = $ionicPlatform.registerBackButtonAction(
-                customBackFunction, 101
-            );
- 
+        $rootScope.deregisterHardBack = $ionicPlatform.registerBackButtonAction(customBackFunction, 101);
+
         $rootScope.scans += 1;
         console.log( "scans " + $rootScope.scans);
 
-        analytics.trackEvent('Scan', 'Start', '', $rootScope.scans);
-
         $ionicAnalytics.track("ScanStart", {uuid: device.uuid, scans: $rootScope.scans})
 
-        
-      var isIOS = ionic.Platform.isIOS();
-      if (isIOS)
-        scanner.startScanning(MWBSInitSpace.init,function(result){
-            if (result.type == 'Cancel')
-            return;
-            $state.go('detail', {barcode: result.code});
-            });
-        else
-            scanner.startScanning(MWBSInitSpace.init,function(result){
-                if (result.type == 'Cancel') {
-                    analytics.trackEvent('Scan', 'Finished', 'Canceled', $rootScope.scans);
-                    return;
-                }
-                
-                analytics.trackEvent('Scan', 'Finished', result.code, $rootScope.scans);
-                $state.go('detail', {barcode: result.code});
-                },0,13,100,74);
+        scannerHelper.startScanning($rootScope, analytics, $state);
     }
-  }
+    }
 })
 
 .controller("UnLabedlItemsCtrl", function($scope, userService,$state){
@@ -167,37 +132,26 @@ $scope.Scan = function(){
 
 .controller("DetailCtrl",function($rootScope, userService, $scope, $state, $stateParams, Camera, $cordovaToast, $ionicModal, $ionicLoading, $ionicAnalytics, $ionicViewService, $ionicHistory, analytics){
 
-$rootScope.deregisterHardBack();
-$scope.isNewProduct=0;
-var disableUpdate=0;
-scanner.closeScanner();
+    $rootScope.deregisterHardBack();
+    $scope.isNewProduct=0;
+    var disableUpdate=0;
+    scanner.closeScanner();
 
- $rootScope.scans -= 1 ;
+    $rootScope.scans -= 1 ;
 
-analytics.trackView("DetailsLoaded");
+    analytics.trackView("DetailsLoaded");
+    $ionicAnalytics.track("DetailsLoaded", {uuid: device.uuid, scans: $rootScope.scans})
 
-$ionicAnalytics.track("DetailsLoaded", {uuid: device.uuid, scans: $rootScope.scans})
+    $scope.show = function() {    $ionicLoading.show({ template: 'טוען' });};
 
-// too many barcodes, wait until export is possible from analytics
-//$ionicAnalytics.track("DetailsLoaded", {barcode: $stateParams.barcode })
+    $scope.hide = function(){$ionicLoading.hide();};
 
-
-$scope.show = function() {
-    $ionicLoading.show({
-      template: 'טוען'
+    $ionicModal.fromTemplateUrl('templates/newProduct.html', {
+        scope: $scope,
+        animation: 'slide-in-up'
+    }).then(function(modal) {
+        $scope.modal = modal;
     });
-  };
-  $scope.hide = function(){
-    $ionicLoading.hide();
-  };
-  
-  
-$ionicModal.fromTemplateUrl('templates/newProduct.html', {
-      scope: $scope,
-      animation: 'slide-in-up'
-   }).then(function(modal) {
-      $scope.modal = modal;
-   });
 
  $scope.showToast = function(message, duration, location) {
         $cordovaToast.show(message, duration, location).then(function(success) {
@@ -215,26 +169,17 @@ $scope.refresh = function(sendAnalytics){
     $scope.item = {};
     $scope.item.barcode = $stateParams.barcode;
    
-    userService.getProduct($stateParams.barcode).then(function(response){
-            console.log("response 1 " + response);
+    userService.getProduct($stateParams.barcode, sendAnalytics).then(function(response){
             if(response == null) {
-                
                 $scope.item.gf=0;
                 $scope.item.ngf=0;
-                
-                if(sendAnalytics == 1) {
-                    analytics.trackEvent("NewProduct", 'Loaded',$stateParams.barcode,0);
-                    $ionicAnalytics.track("NewProduct", {uuid: device.uuid});
-                    $scope.isNewProduct=1;
-                }
+                $scope.isNewProduct=1;
+
+                $ionicAnalytics.track("NewProduct", {uuid: device.uuid});
             }
             else {
                     $scope.item = response;
-
-                    if (sendAnalytics == 1) {
-                        analytics.trackEvent("ExistingProduct", 'Loaded',$stateParams.barcode,0);
-                        $ionicAnalytics.track("ExistingProduct", {uuid: device.uuid});
-                    }
+                    $ionicAnalytics.track("ExistingProduct", {uuid: device.uuid});
             }                
             $scope.hide();
      });

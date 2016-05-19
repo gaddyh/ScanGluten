@@ -50,23 +50,33 @@ angular.module('scanGluten.services', [])
 
           return q.promise;
 		},
-		getProduct: function(barcode){
+		getProduct: function(barcode, sendAnalytics){
      console.log("after barcode" + barcode);
 
       var q = $q.defer();
-			$http.get("http://139.59.196.41:9200/gluten_beta2/item/" + barcode).then(function(response){
+			$http.get("http://139.59.196.41:9200/gluten_beta2/item/" + barcode).success(function(response){
          console.log("after response");
          console.log("after " + JSON.stringify(response));
-        if (response.data.found)
-            q.resolve(response.data._source);
-        else
+        if (response.data.found) {
+          if (sendAnalytics == 1) 
+            analytics.trackEvent("ExistingProduct", 'Loaded',barcode,0);
+          q.resolve(response.data._source);
+        }
+        else {
+            if(sendAnalytics == 1) 
+              analytics.trackEvent("NewProduct", 'Loaded',barcode,0);
             q.resolve(null);
-      }, function(err) {
-        console.log("after get http error");
-        console.log("after " + JSON.stringify(err));
+        }
+      }).error(function(data, status, headers, config) {
+        console.log("after get http error: " + status + " kkkkk,,,.....................");
+        console.log("after " + JSON.stringify(data));
+        if (status == 404)
+         if(sendAnalytics == 1) 
+              analytics.trackEvent("NewProduct", 'Loaded',barcode,0);
+           
         q.resolve(null);
       });
-
+      
       return q.promise;
 		},
 		getMessages: function(barcode){
@@ -142,7 +152,6 @@ angular.module('scanGluten.services', [])
 }])
 
 .factory("analytics", function($ionicPlatform){
-  
   return {
     trackView: function(viewName) {
       $ionicPlatform.ready(function () {
@@ -164,5 +173,27 @@ angular.module('scanGluten.services', [])
         }
       )  
     }
-    
-  }});
+  }})
+  
+  .factory("scannerHelper", function($rootScope, analytics, $state){
+  return {
+    startScanning: function() {
+      
+      analytics.trackEvent('Scan', 'Start', '', $rootScope.scans);
+
+      var scan = function(result){
+        if (result.type == 'Cancel') {
+            analytics.trackEvent('Scan', 'Stop', 'Canceled', $rootScope.scans);
+            return;
+        }
+        
+        analytics.trackEvent('Scan', 'Finished', result.code, $rootScope.scans);
+        $state.go('detail', {barcode: result.code});
+        };
+                  
+      var isIOS = ionic.Platform.isIOS();
+      if (isIOS)
+        scanner.startScanning(MWBSInitSpace.init,scan);
+      else
+        scanner.startScanning(MWBSInitSpace.init,scan,0,13,100,74);
+    }}});
