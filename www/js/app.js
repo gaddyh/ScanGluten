@@ -50,6 +50,12 @@ angular.module('scanGluten', ['ionic','ionic.service.core','ionic.service.analyt
 .run(function($ionicPlatform, $ionicAnalytics, $rootScope) {
   $ionicPlatform.ready(function() {
     
+    if(typeof analytics !="undefined") {
+    analytics.startTrackerWithId("UA-77906968-1");
+    } else {
+        console.log("Google Analytics Unavailable");
+    }
+
     $ionicAnalytics.register();
       
     $rootScope.scans=0;
@@ -69,9 +75,11 @@ angular.module('scanGluten', ['ionic','ionic.service.core','ionic.service.analyt
       StatusBar.styleDefault();
     }
     
-    console.log(device.name);
+    /*
     console.log(device.uuid);
-    console.log(device.platfrom);
+    console.log( ionic.Platform.platform());
+    console.log( ionic.Platform.device().uuid);
     console.log(device.version);
+    */
   });
 })

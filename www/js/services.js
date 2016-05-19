@@ -139,4 +139,30 @@ angular.module('scanGluten.services', [])
       return q.promise;
     }
   }
-}]);
+}])
+
+.factory("analytics", function($ionicPlatform){
+  
+  return {
+    trackView: function(viewName) {
+      $ionicPlatform.ready(function () {
+        if(typeof analytics !="undefined") {
+          analytics.trackView(viewName);
+        } else {
+            console.log("Google Analytics Unavailable");
+          }
+        }
+      )  
+    },
+    trackEvent: function(category, action, label, value ) {
+      $ionicPlatform.ready(function () {
+        if(typeof analytics !="undefined") {
+          analytics.trackEvent(category, action, label, value);
+        } else {
+            console.log("Google Analytics Unavailable");
+          }
+        }
+      )  
+    }
+    
+  }});

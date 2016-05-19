@@ -1,7 +1,9 @@
 angular.module('scanGluten.controllers', [])
 
 
-.controller("MessagesCtrl",function(userService, $rootScope,$scope, $ionicPlatform,$state,$ionicAnalytics,$stateParams,$ionicViewService, $ionicHistory){
+.controller("MessagesCtrl",function(userService, $rootScope,$scope, $ionicPlatform,$state,$ionicAnalytics,$stateParams,$ionicViewService, $ionicHistory, analytics){
+
+analytics.trackView("Messages");
 
 $scope.name = $stateParams.name;
 
@@ -52,7 +54,9 @@ $scope.onSwipeRight = function(){
     
 })
 
-.controller("MainCtrl",function($rootScope,$scope, $ionicPlatform,$state,$ionicAnalytics){
+.controller("MainCtrl",function($rootScope,$scope, $ionicPlatform,$state,$ionicAnalytics, analytics){
+
+analytics.trackView("Main");
 
 customBackFunction = function(){
     console.log("stop scanner");
@@ -81,8 +85,12 @@ $scope.Scan = function(){
  
         $rootScope.scans += 1;
         console.log( "scans " + $rootScope.scans);
+
+        analytics.trackEvent('Scan', 'Start', '', $rootScope.scans);
+
         $ionicAnalytics.track("ScanStart", {uuid: device.uuid, scans: $rootScope.scans})
 
+        
       var isIOS = ionic.Platform.isIOS();
       if (isIOS)
         scanner.startScanning(MWBSInitSpace.init,function(result){
@@ -92,8 +100,12 @@ $scope.Scan = function(){
             });
         else
             scanner.startScanning(MWBSInitSpace.init,function(result){
-                if (result.type == 'Cancel')
-                return;
+                if (result.type == 'Cancel') {
+                    analytics.trackEvent('Scan', 'Finished', 'Canceled', $rootScope.scans);
+                    return;
+                }
+                
+                analytics.trackEvent('Scan', 'Finished', result.code, $rootScope.scans);
                 $state.go('detail', {barcode: result.code});
                 },0,13,100,74);
     }
@@ -153,7 +165,7 @@ $scope.Scan = function(){
      });
 })
 
-.controller("DetailCtrl",function($rootScope, userService, $scope, $state, $stateParams, Camera, $cordovaToast, $ionicModal, $ionicLoading, $ionicAnalytics, $ionicViewService, $ionicHistory){
+.controller("DetailCtrl",function($rootScope, userService, $scope, $state, $stateParams, Camera, $cordovaToast, $ionicModal, $ionicLoading, $ionicAnalytics, $ionicViewService, $ionicHistory, analytics){
 
 $rootScope.deregisterHardBack();
 $scope.isNewProduct=0;
@@ -161,6 +173,8 @@ var disableUpdate=0;
 scanner.closeScanner();
 
  $rootScope.scans -= 1 ;
+
+analytics.trackView("DetailsLoaded");
 
 $ionicAnalytics.track("DetailsLoaded", {uuid: device.uuid, scans: $rootScope.scans})
 
@@ -209,6 +223,7 @@ $scope.refresh = function(sendAnalytics){
                 $scope.item.ngf=0;
                 
                 if(sendAnalytics == 1) {
+                    analytics.trackEvent("NewProduct", 'Loaded',$stateParams.barcode,0);
                     $ionicAnalytics.track("NewProduct", {uuid: device.uuid});
                     $scope.isNewProduct=1;
                 }
@@ -216,8 +231,10 @@ $scope.refresh = function(sendAnalytics){
             else {
                     $scope.item = response;
 
-                    if (sendAnalytics == 1)
+                    if (sendAnalytics == 1) {
+                        analytics.trackEvent("ExistingProduct", 'Loaded',$stateParams.barcode,0);
                         $ionicAnalytics.track("ExistingProduct", {uuid: device.uuid});
+                    }
             }                
             $scope.hide();
      });
@@ -241,9 +258,14 @@ $scope.refresh(1);
       console.log(JSON.stringify($scope.item));
     });
     
-    if ($scope.isNewProduct == 1)
+    if ($scope.isNewProduct == 1) {
+        analytics.trackEvent('NewProduct', 'Created',$scope.item.barcode,0);    
         $ionicAnalytics.track("UpdateNewProduct", {uuid: device.uuid});
-        
+    } else {
+        analytics.trackEvent('ExistingProduct', 'Updated',$scope.item.barcode,0);    
+        //$ionicAnalytics.track("UpdateNewProduct", {uuid: device.uuid});
+    }
+    
     $scope.showToast('תודה רבה', 'short', 'bottom');
     $state.go('main');
   }
