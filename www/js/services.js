@@ -1,5 +1,64 @@
 angular.module('scanGluten.services', [])
 
+.factory('http', function($http, $q,$rootScope) {
+  return {
+    get: function(esType, barcode, sendAnalytics,category){
+     console.log("after barcode" + barcode);
+
+      var q = $q.defer();
+			$http.get("http://139.59.196.41:9200/gluten_beta2/" + esType + "/" + barcode).success(function(response){
+         console.log("after response");
+         console.log("after " + JSON.stringify(response));
+        if (response.found) {
+          if (sendAnalytics == 1) 
+            analytics.trackEvent(category, 'Found',barcode,0);
+          q.resolve(response._source);
+        }
+        else {
+            if(sendAnalytics == 1) 
+              analytics.trackEvent(category, 'NotFound',device.uuid,0);
+            q.resolve(null);
+        }
+      }).error(function(data, status, headers, config) {
+        console.log("after get http error: " + status + " kkkkk,,,.....................");
+        console.log("after " + JSON.stringify(data));
+        if (status == 404) {
+         if(sendAnalytics == 1) 
+              analytics.trackEvent(category, '404',device.uuid,0);
+        }
+        else
+        {
+            analytics.trackEvent(category, 'GetError',device.uuid,0);
+            analytics.trackException(data, false)
+        }
+        q.resolve(null);
+      });
+      
+      return q.promise;
+		},
+    post: function(esType, id, params, category){
+
+      var q = $q.defer();
+
+			$http.post("http://139.59.196.41:9200/gluten_beta2/" + esType + "/" + id,params).then(function(response){
+        console.log(JSON.stringify(response));
+        if (response.data.created)
+          analytics.trackEvent(category, 'Create', id);
+        else
+          analytics.trackEvent(category, 'Update', id);
+          
+        q.resolve(response);
+      }, function(err) {
+          analytics.trackEvent(category, 'PostError', id);
+          analytics.trackException(err, false)
+          q.reject(err);
+      });
+
+      return q.promise;
+    }
+  }
+})
+
 .factory('userService', function($http, $q,$rootScope) {
 	return {
         
@@ -39,38 +98,22 @@ angular.module('scanGluten.services', [])
                   }
                   
             console.log(JSON.stringify(query));
-            $http.post("http://139.59.196.41:9200/gluten_beta2/item/_search?size=100",query).then(function(response){
-            if (response.data.hits)
-            {
-                console.log("after response 11");
-                console.log("after " + JSON.stringify(response));
-                q.resolve(response.data.hits.hits);
-            }
-            else {
-                console.log("after " + JSON.stringify(response.data));
-                q.resolve(null);
-            }                
-            }, function(err) {
-                console.log("after response 33 " + err);
-                q.resolve(null);
-            });
-
-          return q.promise;
-		},
-      searchUnLabeled: function(producer,name){
-            var q = $q.defer();
-            query = {"query": {"bool": {"must": [{ "match": { "gf":  "0" }},{ "match": { "ngf": "0"}},{ "match": { "name": "\"" + name + "\""}},{ "match": { "producer": "\"" + producer + "\""}}]}}}
             
-            if (!producer && producer.length == 0)
-              query = {"query": {"bool": {"must": [{ "match": { "gf":  "0" }},{ "match": { "ngf": "0"}},{ "match": { "name": "\"" + name + "\""}}]}}}
-            if (!name && name.length == 0)
-              query = {"query": {"bool": {"must": [{ "match": { "gf":  "0" }},{ "match": { "ngf": "0"}},{ "match": { "producer": "\"" + producer + "\""}}]}}}
-              
+
+            var d = "";
+            if (name && name.length>0) 
+              d += name;
+          if (producer && producer.length>0) 
+              d += " " + producer;
+          
             $http.post("http://139.59.196.41:9200/gluten_beta2/item/_search?size=100",query).then(function(response){
             if (response.data.hits)
             {
-                console.log("after response 11");
-                console.log("after " + JSON.stringify(response));
+                analytics.trackEvent('Search', 'Success', d,response.data.hits.total);
+
+                console.log("after search hits " + response.data.hits.total);
+                //console.log("after " + JSON.stringify(response));
+                console.log("after search: " + d);
                 q.resolve(response.data.hits.hits);
             }
             else {
@@ -78,106 +121,13 @@ angular.module('scanGluten.services', [])
                 q.resolve(null);
             }                
             }, function(err) {
+                analytics.trackEvent('Search', 'Error', d);
                 console.log("after response 33 " + err);
                 q.resolve(null);
             });
 
           return q.promise;
 		},
-    getUnLabeled: function(){
-            var q = $q.defer();
-                $http.post("http://139.59.196.41:9200/gluten_beta2/item/_search?size=100",{"query": {"bool": {"should": [{ "match": { "gf":  "0" }},{ "match": { "ngf": "0"}}]}}}).then(function(response){
-            if (response.data.hits)
-            {
-                console.log("after response 11");
-                console.log("after " + JSON.stringify(response));
-                q.resolve(response.data.hits.hits);
-            }
-            else {
-                console.log("after " + JSON.stringify(response.data));
-                q.resolve(null);
-            }                
-            }, function(err) {
-                console.log("after response 33 " + err);
-                q.resolve(null);
-            });
-
-          return q.promise;
-		},
-		getProduct: function(barcode, sendAnalytics){
-     console.log("after barcode" + barcode);
-
-      var q = $q.defer();
-			$http.get("http://139.59.196.41:9200/gluten_beta2/item/" + barcode).success(function(response){
-         console.log("after response");
-         console.log("after " + JSON.stringify(response));
-        if (response.found) {
-          if (sendAnalytics == 1) 
-            analytics.trackEvent("ExistingProduct", 'Loaded',barcode,0);
-          q.resolve(response._source);
-        }
-        else {
-            if(sendAnalytics == 1) 
-              analytics.trackEvent("NewProduct", 'Loaded',barcode,0);
-            q.resolve(null);
-        }
-      }).error(function(data, status, headers, config) {
-        console.log("after get http error: " + status + " kkkkk,,,.....................");
-        console.log("after " + JSON.stringify(data));
-        if (status == 404)
-         if(sendAnalytics == 1) 
-              analytics.trackEvent("NewProduct", 'Loaded',barcode,0);
-           
-        q.resolve(null);
-      });
-      
-      return q.promise;
-		},
-		getMessages: function(barcode){
-     console.log("after barcode" + barcode);
-
-      var q = $q.defer();
-			$http.get("http://139.59.196.41:9200/gluten_beta2/messages/" + barcode).then(function(response){
-         console.log("after response");
-         console.log("after " + JSON.stringify(response));
-        if (response.data.found)
-            q.resolve(response.data._source);
-        else
-            q.resolve(null);
-      }, function(err) {
-        console.log("after get http error");
-        console.log("after " + JSON.stringify(err));
-        q.resolve(null);
-      });
-
-      return q.promise;
-		},
-		updateMessages: function(id, params){
-
-      var q = $q.defer();
-
-			$http.post("http://139.59.196.41:9200/gluten_beta2/messages/" + id,params).then(function(response){
-        q.resolve(response);
-      }, function(err) {
-        console.log(JSON.stringify(err));
-        q.reject(err);
-      });
-
-      return q.promise;
-    },
-		updateProduct: function(id, params){
-
-      var q = $q.defer();
-
-			$http.post("http://139.59.196.41:9200/gluten_beta2/item/" + id,params).then(function(response){
-        q.resolve(response);
-      }, function(err) {
-        console.log(JSON.stringify(err));
-        q.reject(err);
-      });
-
-      return q.promise;
-    },
 	}
 })
 
@@ -233,15 +183,22 @@ angular.module('scanGluten.services', [])
   return {
     startScanning: function() {
       
-      analytics.trackEvent('Scan', 'Start', '', $rootScope.scans);
+      analytics.trackEvent('Scan', 'Start', device.uuid, $rootScope.scans);
+      $rootScope.startScan = Date.now();
 
       var scan = function(result){
         if (result.type == 'Cancel') {
-            analytics.trackEvent('Scan', 'Stop', 'Canceled', $rootScope.scans);
+            analytics.trackEvent('Scan', 'Canceled',device.uuid, $rootScope.scans);
             return;
         }
         
-        analytics.trackEvent('Scan', 'Finished', result.code, $rootScope.scans);
+      var end = Date.now();
+        var inter = end - $rootScope.startScan;
+        analytics.trackEvent('Scan', 'Success', result.code, $rootScope.scans);
+        analytics.trackEvent('Scan', 'Timing', result.type, inter);
+        //console.log("scan timing: " + inter );
+//        analytics.trackTiming('Scan', inter, result.code, result.type);
+        //analytics.trackTiming('Scan', "3456", "sdsd", "sdsd");
         $state.go('detail', {barcode: result.code});
         };
                   
@@ -250,4 +207,42 @@ angular.module('scanGluten.services', [])
         scanner.startScanning(MWBSInitSpace.init,scan);
       else
         scanner.startScanning(MWBSInitSpace.init,scan,0,13,100,74);
-    }}});
+    }}})
+
+.factory('toast', function($cordovaToast){
+       return {
+        showToast:  function(message, duration, location) {
+        $cordovaToast.show(message, duration, location).then(function(success) {
+            console.log("The toast was shown");
+        }, function (error) {
+            console.log("The toast was not shown due to " + error);
+        });
+    }
+    }
+    })
+    
+    .factory('detailsHelper', function($rootScope, analytics){
+       return {
+        setup:  function() {
+              if ($rootScope.deregisterHardBack != null)
+                $rootScope.deregisterHardBack();
+        
+              scanner.closeScanner();
+              $rootScope.scans -= 1 ;
+              
+              analytics.trackView("DetailsLoaded");
+        }
+      }
+    })
+    
+    .factory('loadingHelper', function($ionicLoading){
+       return {
+        show:  function() {
+            $ionicLoading.show({ template: 'טוען' });
+          },
+        hide: function() {
+          $ionicLoading.hide();
+        }
+      }
+    });
+

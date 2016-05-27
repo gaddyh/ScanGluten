@@ -51,7 +51,8 @@ angular.module('scanGluten', ['ionic','ionic.service.core','ionic.service.analyt
   $ionicPlatform.ready(function() {
     
     if(typeof analytics !="undefined") {
-    analytics.startTrackerWithId("UA-77906968-1");
+      analytics.startTrackerWithId("UA-77906968-1");
+      analytics.setUserId(device.uuid);
     } else {
         console.log("Google Analytics Unavailable");
     }
