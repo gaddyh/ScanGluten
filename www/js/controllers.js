@@ -65,7 +65,7 @@ angular.module('scanGluten.controllers', [])
     }
 
     $scope.Scan = function(){
-        var debug = true;   
+        var debug = false;   
         if(debug) { 
             analytics.trackEvent('ScanDebug', 'Start', '', 5);
             $state.go('detail', {barcode: 432});
@@ -149,7 +149,18 @@ angular.module('scanGluten.controllers', [])
     
     $scope.user = {};
     
-    
+    http.get("user",device.uuid, 1, "User").then(function(response){
+        if (response != null) {   
+            $scope.userMarkedBarcodes = response.barcodes;
+            
+            if ($scope.userMarkedBarcodes.indexOf($stateParams.barcode) > -1) // contains 
+                disableUpdate = 1;
+            else
+                disableUpdate = 0;
+        }
+        else
+            disableUpdate = 0;
+    });
 
     $scope.onPhoto = function(){
 
@@ -183,6 +194,16 @@ angular.module('scanGluten.controllers', [])
             }
             http.post("item",$scope.item.barcode, $scope.item, "Product").then(function(data){
             });
+            
+            if ($scope.userMarkedBarcodes == null)
+                $scope.userMarkedBarcodes =[];
+            
+            $scope.userMarkedBarcodes.push($scope.item.barcode)
+        
+            var params = {"barcodes": $scope.userMarkedBarcodes};
+            http.post("user",device.uuid, params, "User").then(function(data){
+            });
+            
             disableUpdate = 1;
         }
         else {
