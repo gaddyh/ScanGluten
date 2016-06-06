@@ -39,8 +39,14 @@ angular.module('scanGluten', ['ionic','ionic.service.core','ionic.service.analyt
       templateUrl: 'templates/first-time.html',
       controller: 'FirstTimeCtrl'
     })
+    
+    .state('feedback', {
+      url: '/feedback',
+      templateUrl: 'templates/feedback.html',
+      controller: 'FeedbackCtrl'
+    })
 
-    if (window.localStorage['firstTimeUse'] != 'no') {
+    if (window.localStorage['firstTimeUse1'] != 'no') {
         $urlRouterProvider.otherwise('/first-time');  
     } else {
           $urlRouterProvider.otherwise('/main');

@@ -1,6 +1,38 @@
 angular.module('scanGluten.controllers', [])
 
 
+.controller("FeedbackCtrl",function(http, $rootScope,$scope, $ionicPlatform,$state,$ionicAnalytics,$stateParams, $ionicHistory, analytics){
+     $scope.sendFeedback= function(liked, disliked, want) {
+        var body="";
+        if(liked != undefined)
+            body +=     "הכי אהבתי ש:\n" + liked + "\n" + "\n";
+        if(disliked != undefined)
+            body += "הכי פחות אהבתי ש:\n" + disliked + "\n" + "\n";
+        if(want != undefined)
+            body += "הכי הייתי רוצה ש:\n" + want;
+            
+        if(window.plugins && window.plugins.emailComposer) {
+            window.plugins.emailComposer.showEmailComposerWithCallback(function(result) {
+                console.log("Response -> " + result);
+            }, 
+            
+            "פידבק על חכמת הגלוטן", // Subject
+            body,
+            ["scanglutenisrael@gmail.com"],    // To
+            null,                    // CC
+            null,                    // BCC
+            false,                   // isHTML
+            null,                    // Attachments
+            null);                   // Attachment Data
+        }
+    }
+    
+     $scope.onSwipeRight = function(){
+        $ionicHistory.goBack();
+    }
+
+})
+
 .controller("MessagesCtrl",function(http, $rootScope,$scope, $ionicPlatform,$state,$ionicAnalytics,$stateParams, $ionicHistory, analytics){
 
     analytics.trackView("Messages");
@@ -62,6 +94,10 @@ angular.module('scanGluten.controllers', [])
 
     $scope.onSwipeUp = function (){
     $state.go('search');
+    }
+    
+    $scope.onSwipeDown = function (){
+    $state.go('feedback');
     }
 
     $scope.Scan = function(){
@@ -240,7 +276,7 @@ angular.module('scanGluten.controllers', [])
    }
    
    $scope.lastTime = function() {
-     window.localStorage['firstTimeUse'] = 'no';
+     window.localStorage['firstTimeUse1'] = 'no';
      $state.go("main");  
    }
 }])
